@@ -35,8 +35,8 @@ class UI {
   // Show balance
   showBalance() {
     const expense = this.totalExpense();
-    const total = parseInt(this.budgetAmount.text) - expense;
-    this.balanceAmount.text = total;
+    const total = parseInt(this.budgetAmount.textContent) - expense;
+    this.balanceAmount.textContent = total;
     if(total < 0) {
       this.balance.classList.remove('showGreen', 'showBlack');
       this.balance.classList.add('showRed');
@@ -103,18 +103,51 @@ class UI {
     this.expenseList.appendChild(div);
   }
 
-
   // Total expense
   totalExpense() {
     let total = 0;
-    if(this.itemList.length>0) {
-      total = this.itemList.reduce(function(acc,curr){
+    if(this.itemList.length > 0) {
+      total = this.itemList.reduce(function(acc, curr){
         acc += curr.amount;
         return acc;
-      }, 0)
+      }, 0);
     }
     this.expenseAmount.textContent = total;
     return total;
+  }
+  // Edit expense
+  editExpense(element) {
+    let id = parseInt(element.dataset.id);
+    let parent = element.parentElement.parentElement.parentElement;
+    // Remove from DOM
+    this.expenseList.removeChild(parent);
+    // Remove from the list
+    let expense = this.itemList.filter(function(item){
+      return item.id === id;
+    });
+    // Show value
+    this.expenseInput.value = expense[0].title;
+    this.amountInput.value = expense[0].amount;
+
+    // Remove from list
+    let tempList = this.itemList.filter(function(item){
+      return item.id !==id;
+    });
+    this.itemList = tempList;
+    this.showBalance();
+  }
+  // Delete expense
+  deleteExpense(element) {
+    let id = parseInt(element.dataset.id);
+    let parent = element.parentElement.parentElement.parentElement;
+    // Remove from DOM
+    this.expenseList.removeChild(parent);
+    // Remove from list
+    let tempList = this.itemList.filter(function(item){
+      return item.id !==id;
+    });
+    this.itemList = tempList;
+    this.showBalance();
   }
 }
 
@@ -140,8 +173,13 @@ function eventListeners() {
 
   // Expense list click
   expenseList.addEventListener('click', function(event) {
-
-  })
+    if(event.target.parentElement.classList.contains('edit-icon')){
+      ui.editExpense(event.target.parentElement)
+    }
+    else if(event.target.parentElement.classList.contains('delete-icon')){
+      ui.deleteExpense(event.target.parentElement)
+    }
+  });
 }
 
 document.addEventListener('DOMContentLoaded', function(){
